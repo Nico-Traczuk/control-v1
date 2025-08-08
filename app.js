@@ -598,6 +598,11 @@ function updateWeeklyBreakdown(monthlyExpenses) {
     const weekRanges = getWeekRanges(currentViewYear, currentViewMonth);
     const weeklyBreakdownDiv = document.getElementById('weeklyBreakdown');
     
+    if (!weeklyBreakdownDiv) {
+        console.error('Weekly breakdown element not found');
+        return;
+    }
+    
     let weeklyHTML = '';
     
     weekRanges.forEach(week => {
@@ -608,10 +613,9 @@ function updateWeeklyBreakdown(monthlyExpenses) {
         
         const weekTotal = weekExpenses.reduce((sum, e) => sum + e.amount, 0);
         const weekRemaining = weeklyIncomeARS - weekTotal;
-        const weekPercentage = (weekTotal / weeklyIncomeARS) * 100;
+        const weekPercentage = weeklyIncomeARS > 0 ? (weekTotal / weeklyIncomeARS) * 100 : 0;
         
         const statusColor = weekRemaining >= 0 ? 'text-green-600' : 'text-red-600';
-        const bgColor = weekRemaining >= 0 ? 'bg-green-50' : 'bg-red-50';
         
         weeklyHTML += `
             <div class="p-4 bg-gray-50 rounded-lg border border-gray-200 hover:shadow-md transition-shadow">
@@ -635,6 +639,10 @@ function updateWeeklyBreakdown(monthlyExpenses) {
             </div>
         `;
     });
+    
+    if (weeklyHTML === '') {
+        weeklyHTML = '<div class="text-center text-gray-500 py-4">No hay datos de semanas para mostrar</div>';
+    }
     
     weeklyBreakdownDiv.innerHTML = weeklyHTML;
 }
