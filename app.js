@@ -306,7 +306,14 @@ function updateSummaryCards() {
     // Update month title
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
                        'July', 'August', 'September', 'October', 'November', 'December'];
-    document.getElementById('currentMonthTitle').textContent = `${monthNames[currentViewMonth]} ${currentViewYear} Overview`;
+    const monthTitle = `${monthNames[currentViewMonth]} ${currentViewYear} Overview`;
+    document.getElementById('currentMonthTitle').textContent = monthTitle;
+    
+    // Update mobile month title if it exists
+    const mobileTitleElement = document.getElementById('currentMonthTitleMobile');
+    if (mobileTitleElement) {
+        mobileTitleElement.textContent = monthTitle;
+    }
     
     // Update income display
     document.getElementById('monthlyIncome').textContent = `ARS ${formatARS(monthlyBudgetARS)}`;
@@ -374,6 +381,8 @@ function updateSummaryCards() {
 
 function updateExpenseList(filter = '') {
     const tbody = document.getElementById('expenseList');
+    const mobileList = document.getElementById('expenseListMobile');
+    
     let filteredExpenses = expenses.filter(e => {
         const expenseDate = new Date(e.date);
         return expenseDate.getMonth() === currentViewMonth && expenseDate.getFullYear() === currentViewYear;
@@ -388,6 +397,7 @@ function updateExpenseList(filter = '') {
     
     filteredExpenses.sort((a, b) => new Date(b.date) - new Date(a.date));
     
+    // Desktop table view
     tbody.innerHTML = filteredExpenses.slice(0, 10).map(expense => `
         <tr class="border-b hover:bg-gray-50">
             <td class="py-2 px-2 text-sm">${formatDate(expense.date)}</td>
@@ -408,8 +418,32 @@ function updateExpenseList(filter = '') {
         </tr>
     `).join('');
     
+    // Mobile card view
+    mobileList.innerHTML = filteredExpenses.slice(0, 10).map(expense => `
+        <div class="expense-card-mobile" style="border-left-color: ${categoryColors[expense.category]}">
+            <div class="flex justify-between items-start mb-1.5">
+                <div class="flex-1">
+                    <h4 class="font-semibold text-gray-800 text-sm">${expense.description}</h4>
+                    <p class="text-xs text-gray-500 mt-0.5">${formatDate(expense.date)}</p>
+                </div>
+                <button onclick="deleteExpense(${expense.id})" 
+                    class="text-red-500 hover:text-red-700 p-0.5 -mt-1 -mr-1">
+                    <i class="fas fa-trash text-xs"></i>
+                </button>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium" 
+                    style="background-color: ${categoryColors[expense.category]}20; color: ${categoryColors[expense.category]}">
+                    ${categoryIcons[expense.category]} ${expense.category}
+                </span>
+                <span class="font-semibold text-gray-800 text-sm">ARS ${formatARS(expense.amount)}</span>
+            </div>
+        </div>
+    `).join('');
+    
     if (filteredExpenses.length === 0) {
         tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-gray-500"><i class="fas fa-inbox text-3xl mb-2"></i><br>No hay gastos registrados</td></tr>';
+        mobileList.innerHTML = '<div class="text-center py-8 text-gray-500"><i class="fas fa-inbox text-3xl mb-2"></i><br>No hay gastos registrados</div>';
     }
 }
 

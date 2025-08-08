@@ -13,14 +13,15 @@
     <header class="bg-white shadow-lg sticky top-0 z-40">
         <div class="container mx-auto px-4 py-4 max-w-7xl">
             <div class="flex justify-between items-center">
-                <div class="flex items-center gap-4">
-                    <h1 class="text-3xl font-bold text-slate-800">+Control</h1>
-                    <span class="text-sm text-gray-600 hidden md:inline">Tu gestor financiero personal</span>
+                <div class="flex items-center gap-2 sm:gap-4">
+                    <h1 class="text-2xl sm:text-3xl font-bold text-slate-800">+Control</h1>
+                    <span class="text-sm text-gray-600 hidden lg:inline">Tu gestor financiero personal</span>
                 </div>
-                <div class="flex items-center gap-3">
+                <!-- Desktop controls -->
+                <div class="hidden md:flex items-center gap-3">
                     <button onclick="openIncomeModal()" 
                         class="px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-200 shadow">
-                        <i class="fas fa-wallet"></i> <span class="hidden sm:inline">Ingreso</span>
+                        <i class="fas fa-wallet"></i> Ingreso
                     </button>
                     <div class="flex items-center bg-gray-100 rounded-lg px-2">
                         <button onclick="changeMonth(-1)" class="p-2 hover:bg-gray-200 rounded transition">
@@ -47,18 +48,60 @@
                             </button>
                         </div>
                     </div>
-                    <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
                 </div>
+                <!-- Mobile income button only -->
+                <button onclick="openIncomeModal()" 
+                    class="md:hidden px-3 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-200 shadow">
+                    <i class="fas fa-wallet"></i> <span class="hidden sm:inline">Ingreso</span>
+                </button>
+                <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
             </div>
         </div>
     </header>
 
     <div class="container mx-auto px-4 py-6 max-w-7xl">
+        <!-- Mobile Controls Section (shown only on mobile) -->
+        <div class="md:hidden mb-4">
+            <!-- Month Navigation -->
+            <div class="bg-white rounded-lg shadow-sm p-3 mb-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-semibold text-gray-700">Navegación</span>
+                    <div class="flex items-center gap-2">
+                        <button onclick="changeMonth(-1)" class="p-1.5 hover:bg-gray-100 rounded transition">
+                            <i class="fas fa-chevron-left text-gray-600 text-sm"></i>
+                        </button>
+                        <span class="px-2 text-sm font-medium text-gray-800" id="currentMonthTitleMobile">Dec 2025</span>
+                        <button onclick="changeMonth(1)" class="p-1.5 hover:bg-gray-100 rounded transition">
+                            <i class="fas fa-chevron-right text-gray-600 text-sm"></i>
+                        </button>
+                        <button onclick="changeMonth(0)" class="ml-2 p-1.5 bg-slate-600 text-white rounded hover:bg-slate-700 transition" title="Mes Actual">
+                            <i class="fas fa-calendar-day text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Export/Import Actions -->
+            <div class="bg-white rounded-lg shadow-sm p-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-semibold text-gray-700">Acciones</span>
+                    <div class="flex gap-2">
+                        <button onclick="exportData()" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded text-sm transition">
+                            <i class="fas fa-download mr-1"></i> Exportar
+                        </button>
+                        <button onclick="document.getElementById('importFile').click()" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded text-sm transition">
+                            <i class="fas fa-upload mr-1"></i> Importar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Main Stats Section -->
         <div class="mb-6">
             <!-- Summary Cards -->
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
-                <div class="bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition-shadow">
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3 mb-6">
+                <div class="bg-white rounded-xl shadow-md p-3 sm:p-4 hover:shadow-lg transition-shadow">
                     <div class="flex flex-col">
                         <div class="flex items-center justify-between mb-2">
                             <div class="p-2 bg-blue-100 rounded-lg">
@@ -66,13 +109,13 @@
                             </div>
                             <span class="text-xs text-gray-500">Mensual</span>
                         </div>
-                        <p class="text-2xl font-bold text-gray-800" id="monthlyIncome">ARS 900,000</p>
+                        <p class="text-xl sm:text-2xl font-bold text-gray-800" id="monthlyIncome">ARS 900,000</p>
                         <p class="text-xs text-gray-500 mt-1" id="monthlyIncomeUSD">USD 900</p>
                         <p class="text-xs text-gray-500" id="weeksInMonth">4 semanas</p>
                     </div>
                 </div>
                 
-                <div class="bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition-shadow">
+                <div class="bg-white rounded-xl shadow-md p-3 sm:p-4 hover:shadow-lg transition-shadow">
                     <div class="flex flex-col">
                         <div class="flex items-center justify-between mb-2">
                             <div class="p-2 bg-pink-100 rounded-lg">
@@ -80,12 +123,12 @@
                             </div>
                             <span class="text-xs text-gray-500">Gastado</span>
                         </div>
-                        <p class="text-2xl font-bold text-gray-800" id="totalSpent">ARS 0</p>
+                        <p class="text-xl sm:text-2xl font-bold text-gray-800" id="totalSpent">ARS 0</p>
                         <p class="text-xs text-gray-500 mt-1" id="spentPercentage">0% del presupuesto</p>
                     </div>
                 </div>
                 
-                <div class="bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition-shadow">
+                <div class="bg-white rounded-xl shadow-md p-3 sm:p-4 hover:shadow-lg transition-shadow">
                     <div class="flex flex-col">
                         <div class="flex items-center justify-between mb-2">
                             <div class="p-2 bg-green-100 rounded-lg">
@@ -93,12 +136,12 @@
                             </div>
                             <span class="text-xs text-gray-500">Restante</span>
                         </div>
-                        <p class="text-2xl font-bold text-gray-800" id="remaining">ARS 225,000</p>
+                        <p class="text-xl sm:text-2xl font-bold text-gray-800" id="remaining">ARS 225,000</p>
                         <p class="text-xs text-gray-500 mt-1" id="daysLeft">30 días restantes</p>
                     </div>
                 </div>
                 
-                <div class="bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition-shadow">
+                <div class="bg-white rounded-xl shadow-md p-3 sm:p-4 hover:shadow-lg transition-shadow">
                     <div class="flex flex-col">
                         <div class="flex items-center justify-between mb-2">
                             <div class="p-2 bg-purple-100 rounded-lg">
@@ -106,12 +149,12 @@
                             </div>
                             <span class="text-xs text-gray-500">Diario</span>
                         </div>
-                        <p class="text-2xl font-bold text-gray-800" id="dailyAverage">ARS 0</p>
+                        <p class="text-xl sm:text-2xl font-bold text-gray-800" id="dailyAverage">ARS 0</p>
                         <p class="text-xs text-gray-500 mt-1" id="dailyBudget">Presupuesto: ARS 30,000/día</p>
                     </div>
                 </div>
                 
-                <div class="bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition-shadow">
+                <div class="bg-white rounded-xl shadow-md p-3 sm:p-4 hover:shadow-lg transition-shadow">
                     <div class="flex flex-col">
                         <div class="flex items-center justify-between mb-2">
                             <div class="p-2 bg-yellow-100 rounded-lg">
@@ -119,7 +162,7 @@
                             </div>
                             <span class="text-xs text-gray-500">Estado</span>
                         </div>
-                        <p class="text-lg font-bold text-gray-800" id="budgetStatus">En curso</p>
+                        <p class="text-base sm:text-lg font-bold text-gray-800" id="budgetStatus">En curso</p>
                         <p class="text-xs text-gray-500 mt-1" id="projectedSavings">Proyectado: ARS 225,000</p>
                     </div>
                 </div>
@@ -139,8 +182,8 @@
 
         <!-- Main Content Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Charts Section -->
-            <div class="lg:col-span-2 order-2 lg:order-1">
+            <!-- Charts Section (Centered on mobile) -->
+            <div class="lg:col-span-2 order-2 lg:order-1 mx-auto max-w-4xl lg:max-w-none">
                 <div class="bg-white rounded-xl shadow-md p-6 mb-6">
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-xl font-semibold text-gray-800">Análisis de Gastos</h2>
@@ -150,23 +193,23 @@
                             </button>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                        <div class="bg-gray-50 p-3 sm:p-4 rounded-lg">
                             <h3 class="text-sm font-medium text-gray-700 mb-3">Por Categoría</h3>
-                            <div class="relative" style="height: 250px;">
+                            <div class="relative h-48 sm:h-64">
                                 <canvas id="categoryChart"></canvas>
                             </div>
                         </div>
-                        <div class="bg-gray-50 p-4 rounded-lg">
+                        <div class="bg-gray-50 p-3 sm:p-4 rounded-lg">
                             <h3 class="text-sm font-medium text-gray-700 mb-3">Tendencia Diaria</h3>
-                            <div class="relative" style="height: 250px;">
+                            <div class="relative h-48 sm:h-64">
                                 <canvas id="trendChart"></canvas>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-xl shadow-md p-6">
+                <div class="bg-white rounded-xl shadow-md p-4 sm:p-6">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
                         <h2 class="text-xl font-semibold text-gray-800">Historial de Gastos</h2>
                         <div class="flex items-center gap-2 w-full sm:w-auto">
@@ -177,13 +220,14 @@
                             </div>
                         </div>
                     </div>
-                    <div class="overflow-x-auto -mx-6 px-6">
+                    <!-- Desktop Table View -->
+                    <div class="hidden md:block overflow-x-auto -mx-6 px-6">
                         <table class="w-full">
                             <thead>
                                 <tr class="border-b bg-gray-50">
                                     <th class="text-left py-3 px-3 text-xs font-medium text-gray-600 uppercase tracking-wider">Fecha</th>
                                     <th class="text-left py-3 px-3 text-xs font-medium text-gray-600 uppercase tracking-wider">Descripción</th>
-                                    <th class="text-left py-3 px-3 text-xs font-medium text-gray-600 uppercase tracking-wider hidden sm:table-cell">Categoría</th>
+                                    <th class="text-left py-3 px-3 text-xs font-medium text-gray-600 uppercase tracking-wider">Categoría</th>
                                     <th class="text-right py-3 px-3 text-xs font-medium text-gray-600 uppercase tracking-wider">Monto</th>
                                     <th class="text-center py-3 px-3 text-xs font-medium text-gray-600 uppercase tracking-wider">Acción</th>
                                 </tr>
@@ -191,6 +235,11 @@
                             <tbody id="expenseList" class="divide-y divide-gray-200">
                             </tbody>
                         </table>
+                    </div>
+                    
+                    <!-- Mobile Card View -->
+                    <div class="md:hidden space-y-3" id="expenseListMobile">
+                        <!-- Mobile expense cards will be inserted here via JavaScript -->
                     </div>
                 </div>
             </div>
@@ -228,12 +277,41 @@
 
     <!-- Floating Action Button -->
     <button onclick="openExpenseModal()" 
-        class="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-200 z-30">
+        class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-200 z-30">
         <i class="fas fa-plus text-xl"></i>
     </button>
 
     <!-- Add Custom Styles -->
     <style>
+        /* Mobile responsive improvements */
+        @media (max-width: 640px) {
+            /* Mobile expense card styles */
+            .expense-card-mobile {
+                background: white;
+                border-radius: 0 0.5rem 0.5rem 0;
+                padding: 0.75rem;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                transition: all 0.2s;
+                border-left: 3px solid;
+                margin-left: 0.25rem;
+            }
+            
+            .expense-card-mobile:active {
+                transform: scale(0.98);
+            }
+            
+            /* Modal improvements for mobile */
+            .modal-content {
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+            
+            /* Charts mobile optimization */
+            canvas {
+                max-height: 200px !important;
+            }
+        }
+        
         .dropdown:hover .dropdown-content {
             display: block;
         }
@@ -308,8 +386,8 @@
     </style>
 
     <!-- Modal for Income Update -->
-    <div id="incomeModal" class="modal-backdrop fixed inset-0 bg-gray-900 bg-opacity-60 hidden overflow-y-auto h-full w-full z-50 flex items-center justify-center">
-        <div class="modal-content relative mx-auto p-6 w-full max-w-md">
+    <div id="incomeModal" class="modal-backdrop fixed inset-0 bg-gray-900 bg-opacity-60 hidden overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+        <div class="modal-content relative mx-auto w-full max-w-md">
             <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
                 <!-- Modal Header -->
                 <div class="bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-4">
@@ -401,8 +479,8 @@
     </div>
 
     <!-- Modal for Expense -->
-    <div id="expenseModal" class="modal-backdrop fixed inset-0 bg-gray-900 bg-opacity-60 hidden overflow-y-auto h-full w-full z-50 flex items-center justify-center">
-        <div class="modal-content relative mx-auto p-6 w-full max-w-md">
+    <div id="expenseModal" class="modal-backdrop fixed inset-0 bg-gray-900 bg-opacity-60 hidden overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+        <div class="modal-content relative mx-auto w-full max-w-md">
             <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
                 <!-- Modal Header -->
                 <div class="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-4">
