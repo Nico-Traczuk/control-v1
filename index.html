@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plus Control - Control de Gastos</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="bg-gradient-to-br from-slate-800 to-slate-900 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-lg sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-4 max-w-7xl">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <h1 class="text-3xl font-bold text-slate-800">+Control</h1>
+                    <span class="text-sm text-gray-600 hidden md:inline">Tu gestor financiero personal</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="openIncomeModal()" 
+                        class="px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-200 shadow">
+                        <i class="fas fa-wallet"></i> <span class="hidden sm:inline">Ingreso</span>
+                    </button>
+                    <div class="flex items-center bg-gray-100 rounded-lg px-2">
+                        <button onclick="changeMonth(-1)" class="p-2 hover:bg-gray-200 rounded transition">
+                            <i class="fas fa-chevron-left text-gray-600"></i>
+                        </button>
+                        <span class="px-3 text-sm font-medium text-gray-800" id="currentMonthTitle">Dec 2025</span>
+                        <button onclick="changeMonth(1)" class="p-2 hover:bg-gray-200 rounded transition">
+                            <i class="fas fa-chevron-right text-gray-600"></i>
+                        </button>
+                    </div>
+                    <button onclick="changeMonth(0)" class="p-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition" title="Mes Actual">
+                        <i class="fas fa-calendar-day"></i>
+                    </button>
+                    <div class="dropdown relative">
+                        <button class="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
+                            <i class="fas fa-ellipsis-v text-gray-600"></i>
+                        </button>
+                        <div class="dropdown-content hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg">
+                            <button onclick="exportData()" class="w-full text-left px-4 py-2 hover:bg-gray-100 rounded-t-lg text-sm">
+                                <i class="fas fa-download mr-2"></i> Exportar Datos
+                            </button>
+                            <button onclick="document.getElementById('importFile').click()" class="w-full text-left px-4 py-2 hover:bg-gray-100 rounded-b-lg text-sm">
+                                <i class="fas fa-upload mr-2"></i> Importar Datos
+                            </button>
+                        </div>
+                    </div>
+                    <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-4 py-6 max-w-7xl">
+        <!-- Main Stats Section -->
+        <div class="mb-6">
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
+                <div class="bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition-shadow">
+                    <div class="flex flex-col">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="p-2 bg-blue-100 rounded-lg">
+                                <i class="fas fa-wallet text-blue-600"></i>
+                            </div>
+                            <span class="text-xs text-gray-500">Mensual</span>
+                        </div>
+                        <p class="text-2xl font-bold text-gray-800" id="monthlyIncome">ARS 900,000</p>
+                        <p class="text-xs text-gray-500 mt-1" id="monthlyIncomeUSD">USD 900</p>
+                        <p class="text-xs text-gray-500" id="weeksInMonth">4 semanas</p>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition-shadow">
+                    <div class="flex flex-col">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="p-2 bg-pink-100 rounded-lg">
+                                <i class="fas fa-shopping-cart text-pink-600"></i>
+                            </div>
+                            <span class="text-xs text-gray-500">Gastado</span>
+                        </div>
+                        <p class="text-2xl font-bold text-gray-800" id="totalSpent">ARS 0</p>
+                        <p class="text-xs text-gray-500 mt-1" id="spentPercentage">0% del presupuesto</p>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition-shadow">
+                    <div class="flex flex-col">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="p-2 bg-green-100 rounded-lg">
+                                <i class="fas fa-piggy-bank text-green-600"></i>
+                            </div>
+                            <span class="text-xs text-gray-500">Restante</span>
+                        </div>
+                        <p class="text-2xl font-bold text-gray-800" id="remaining">ARS 225,000</p>
+                        <p class="text-xs text-gray-500 mt-1" id="daysLeft">30 días restantes</p>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition-shadow">
+                    <div class="flex flex-col">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="p-2 bg-purple-100 rounded-lg">
+                                <i class="fas fa-calendar-day text-purple-600"></i>
+                            </div>
+                            <span class="text-xs text-gray-500">Diario</span>
+                        </div>
+                        <p class="text-2xl font-bold text-gray-800" id="dailyAverage">ARS 0</p>
+                        <p class="text-xs text-gray-500 mt-1" id="dailyBudget">Presupuesto: ARS 30,000/día</p>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition-shadow">
+                    <div class="flex flex-col">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="p-2 bg-yellow-100 rounded-lg">
+                                <i class="fas fa-chart-line text-yellow-600"></i>
+                            </div>
+                            <span class="text-xs text-gray-500">Estado</span>
+                        </div>
+                        <p class="text-lg font-bold text-gray-800" id="budgetStatus">En curso</p>
+                        <p class="text-xs text-gray-500 mt-1" id="projectedSavings">Proyectado: ARS 225,000</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-sm font-semibold text-gray-700">Progreso del Presupuesto</h3>
+                    <span class="text-sm text-gray-500" id="budgetProgressText">ARS 0 de ARS 900,000 (0%)</span>
+                </div>
+                <div class="bg-gray-200 rounded-full h-3 overflow-hidden">
+                    <div id="budgetProgressBar" class="h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-500" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Charts Section -->
+            <div class="lg:col-span-2 order-2 lg:order-1">
+                <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold text-gray-800">Análisis de Gastos</h2>
+                        <div class="flex gap-2">
+                            <button class="text-sm text-gray-600 hover:text-gray-800">
+                                <i class="fas fa-filter"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h3 class="text-sm font-medium text-gray-700 mb-3">Por Categoría</h3>
+                            <div class="relative" style="height: 250px;">
+                                <canvas id="categoryChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h3 class="text-sm font-medium text-gray-700 mb-3">Tendencia Diaria</h3>
+                            <div class="relative" style="height: 250px;">
+                                <canvas id="trendChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
+                        <h2 class="text-xl font-semibold text-gray-800">Historial de Gastos</h2>
+                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                            <div class="relative flex-1 sm:flex-initial">
+                                <input type="text" id="searchExpense" placeholder="Buscar..." 
+                                    class="pl-8 pr-3 py-2 w-full sm:w-64 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto -mx-6 px-6">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b bg-gray-50">
+                                    <th class="text-left py-3 px-3 text-xs font-medium text-gray-600 uppercase tracking-wider">Fecha</th>
+                                    <th class="text-left py-3 px-3 text-xs font-medium text-gray-600 uppercase tracking-wider">Descripción</th>
+                                    <th class="text-left py-3 px-3 text-xs font-medium text-gray-600 uppercase tracking-wider hidden sm:table-cell">Categoría</th>
+                                    <th class="text-right py-3 px-3 text-xs font-medium text-gray-600 uppercase tracking-wider">Monto</th>
+                                    <th class="text-center py-3 px-3 text-xs font-medium text-gray-600 uppercase tracking-wider">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="expenseList" class="divide-y divide-gray-200">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="lg:col-span-1 order-1 lg:order-2">
+                <!-- Weekly Breakdown -->
+                <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Desglose Semanal</h3>
+                    <div class="space-y-3" id="weeklyBreakdown">
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-md p-6 text-white">
+                    <h3 class="text-lg font-semibold mb-4">Resumen Rápido</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm opacity-90">Gasto más alto</span>
+                            <span class="font-bold" id="highestExpense">ARS 0</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm opacity-90">Categoría principal</span>
+                            <span class="font-bold" id="topCategory">-</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm opacity-90">Total de gastos</span>
+                            <span class="font-bold" id="totalExpenseCount">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Action Button -->
+    <button onclick="openExpenseModal()" 
+        class="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-200 z-30">
+        <i class="fas fa-plus text-xl"></i>
+    </button>
+
+    <!-- Add Custom Styles -->
+    <style>
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+        
+        /* Modal Animations */
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes modalFadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
+        
+        @keyframes modalSlideOut {
+            from {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+        }
+        
+        .modal-backdrop {
+            animation: modalFadeIn 0.3s ease-out;
+            backdrop-filter: blur(4px);
+        }
+        
+        .modal-backdrop.closing {
+            animation: modalFadeOut 0.2s ease-out;
+        }
+        
+        .modal-content {
+            animation: modalSlideIn 0.3s ease-out;
+        }
+        
+        .modal-content.closing {
+            animation: modalSlideOut 0.2s ease-out;
+        }
+        
+        /* Input focus effects */
+        .modal-input:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+        }
+        
+        .modal-input {
+            transition: all 0.2s ease;
+        }
+    </style>
+
+    <!-- Modal for Income Update -->
+    <div id="incomeModal" class="modal-backdrop fixed inset-0 bg-gray-900 bg-opacity-60 hidden overflow-y-auto h-full w-full z-50 flex items-center justify-center">
+        <div class="modal-content relative mx-auto p-6 w-full max-w-md">
+            <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+                <!-- Modal Header -->
+                <div class="bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 bg-white bg-opacity-20 rounded-lg">
+                                <i class="fas fa-wallet text-black text-lg"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold text-white">Actualizar Ingreso</h3>
+                        </div>
+                        <button onclick="closeIncomeModal()" class="text-white hover:text-gray-200 transition">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Modal Body -->
+                <div class="p-6">
+                    <!-- Exchange Rate Section -->
+                    <div class="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-exchange-alt text-blue-600 mr-1"></i> Tipo de Cambio (USD → ARS)
+                        </label>
+                        <div class="flex gap-2 items-center">
+                            <div class="relative flex-1">
+                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">1 USD =</span>
+                                <input type="number" id="exchangeRate" step="0.01" 
+                                    class="modal-input w-full pl-20 pr-12 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    placeholder="1000" onkeyup="updateConversion()">
+                                <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">ARS</span>
+                            </div>
+                            <button onclick="fetchExchangeRate()" 
+                                class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm" title="Obtener cotización actual">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-600 mt-1">Cotización del dólar blue o el que uses</p>
+                    </div>
+
+                    <!-- USD Income Input -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Ingreso Semanal en USD</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-green-600 font-bold">USD</span>
+                            <input type="number" id="modalWeeklyIncomeUSD" step="0.01" 
+                                class="modal-input w-full pl-14 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-lg font-semibold"
+                                placeholder="225.00" onkeyup="updateConversion()">
+                        </div>
+                    </div>
+
+                    <!-- ARS Conversion Display -->
+                    <div class="mb-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-700">Equivalente en Pesos Argentinos:</span>
+                            <span class="text-2xl font-bold text-green-700" id="arsEquivalent">ARS 0</span>
+                        </div>
+                        <p class="text-xs text-gray-600 mt-2" id="monthlyArsEquivalent">Mensual (4 semanas): ARS 0</p>
+                    </div>
+                    
+                    <!-- Quick preset buttons -->
+                    <div class="mb-6">
+                        <p class="text-xs text-gray-600 mb-2">Montos rápidos (USD):</p>
+                        <div class="flex gap-2">
+                            <button onclick="setQuickAmountUSD(100)" 
+                                class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition">$100</button>
+                            <button onclick="setQuickAmountUSD(200)" 
+                                class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition">$200</button>
+                            <button onclick="setQuickAmountUSD(225)" 
+                                class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition">$225</button>
+                            <button onclick="setQuickAmountUSD(300)" 
+                                class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition">$300</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="flex gap-3">
+                        <button onclick="closeIncomeModal()" 
+                            class="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition duration-200 font-medium">
+                            Cancelar
+                        </button>
+                        <button onclick="saveIncome()" 
+                            class="flex-1 px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 transition duration-200 font-medium shadow-lg">
+                            <i class="fas fa-check mr-2"></i> Guardar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Expense -->
+    <div id="expenseModal" class="modal-backdrop fixed inset-0 bg-gray-900 bg-opacity-60 hidden overflow-y-auto h-full w-full z-50 flex items-center justify-center">
+        <div class="modal-content relative mx-auto p-6 w-full max-w-md">
+            <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+                <!-- Modal Header -->
+                <div class="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 bg-white bg-opacity-20 rounded-lg">
+                                <i class="fas fa-receipt text-black text-lg"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold text-white">Nuevo Gasto</h3>
+                        </div>
+                        <button onclick="closeExpenseModal()" class="text-white hover:text-gray-200 transition">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Modal Body -->
+                <div class="p-6">
+                    <form id="modalExpenseForm">
+                        <div class="space-y-4">
+                            <!-- Description -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-pen text-gray-400 mr-1"></i> Descripción
+                                </label>
+                                <input type="text" id="modalDescription" required 
+                                    class="modal-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    placeholder="¿En qué gastaste?">
+                            </div>
+                            
+                            <!-- Amount and Category Row -->
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-dollar-sign text-gray-400 mr-1"></i> Monto (ARS)
+                                    </label>
+                                    <div class="relative">
+                                        <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-xs font-bold">ARS</span>
+                                        <input type="number" id="modalAmount" step="0.01" required 
+                                            class="modal-input w-full pl-12 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            placeholder="10000">
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        <i class="fas fa-calendar text-gray-400 mr-1"></i> Fecha
+                                    </label>
+                                    <input type="date" id="modalDate" required 
+                                        class="modal-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                </div>
+                            </div>
+                            
+                            <!-- Category -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-tag text-gray-400 mr-1"></i> Categoría
+                                </label>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <button type="button" onclick="selectCategory('food')" data-category="food" 
+                                        class="category-btn px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm">
+                                        🍔 Comida
+                                    </button>
+                                    <button type="button" onclick="selectCategory('transport')" data-category="transport" 
+                                        class="category-btn px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm">
+                                        🚗💨 Auto
+                                    </button>
+                                    <button type="button" onclick="selectCategory('utilities')" data-category="utilities" 
+                                        class="category-btn px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm">
+                                        💡 Servicios
+                                    </button>
+                                    <button type="button" onclick="selectCategory('entertainment')" data-category="entertainment" 
+                                        class="category-btn px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm">
+                                        🎮 Diversión
+                                    </button>
+                                    <button type="button" onclick="selectCategory('shopping')" data-category="shopping" 
+                                        class="category-btn px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm">
+                                        🛒 Compras
+                                    </button>
+                                    <button type="button" onclick="selectCategory('health')" data-category="health" 
+                                        class="category-btn px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm">
+                                        🏥 Salud
+                                    </button>
+                                    <button type="button" onclick="selectCategory('education')" data-category="education" 
+                                        class="category-btn px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm">
+                                        📚 Educación
+                                    </button>
+                                    <button type="button" onclick="selectCategory('savings')" data-category="savings" 
+                                        class="category-btn px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm">
+                                        💰 Ahorros
+                                    </button>
+                                    <button type="button" onclick="selectCategory('other')" data-category="other" 
+                                        class="category-btn px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm">
+                                        📌 Otros
+                                    </button>
+                                </div>
+                                <input type="hidden" id="modalCategory" required>
+                            </div>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="flex gap-3 mt-6">
+                            <button type="button" onclick="closeExpenseModal()" 
+                                class="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition duration-200 font-medium">
+                                Cancelar
+                            </button>
+                            <button type="submit" 
+                                class="flex-1 px-4 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition duration-200 font-medium shadow-lg">
+                                <i class="fas fa-plus-circle mr-2"></i> Agregar Gasto
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Category selection for expense modal
+        function selectCategory(category) {
+            document.getElementById('modalCategory').value = category;
+            
+            // Update visual selection
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                if (btn.dataset.category === category) {
+                    btn.classList.add('bg-blue-100', 'border-blue-500', 'text-blue-700');
+                    btn.classList.remove('border-gray-300');
+                } else {
+                    btn.classList.remove('bg-blue-100', 'border-blue-500', 'text-blue-700');
+                    btn.classList.add('border-gray-300');
+                }
+            });
+        }
+        
+        // Currency conversion functions
+        function updateConversion() {
+            const exchangeRate = parseFloat(document.getElementById('exchangeRate').value) || 0;
+            const usdAmount = parseFloat(document.getElementById('modalWeeklyIncomeUSD').value) || 0;
+            
+            const arsAmount = usdAmount * exchangeRate;
+            const monthlyArs = arsAmount * 4; // 4 weeks per month
+            
+            // Format with thousands separator for ARS
+            const formatARS = (num) => {
+                return num.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+            };
+            
+            document.getElementById('arsEquivalent').textContent = `ARS ${formatARS(arsAmount)}`;
+            document.getElementById('monthlyArsEquivalent').textContent = `Mensual (4 semanas): ARS ${formatARS(monthlyArs)}`;
+        }
+        
+        function setQuickAmountUSD(amount) {
+            document.getElementById('modalWeeklyIncomeUSD').value = amount;
+            updateConversion();
+        }
+        
+        function fetchExchangeRate() {
+            // You can integrate with a real API here
+            // For now, we'll just set a common blue dollar rate
+            document.getElementById('exchangeRate').value = 1000;
+            updateConversion();
+            
+            // Show notification
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-20 right-4 px-4 py-2 bg-blue-600 text-white rounded-lg shadow-lg z-50';
+            notification.textContent = 'Cotización actualizada';
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 2000);
+        }
+    </script>
+
+    <script src="app.js"></script>
+</body>
+</html>
